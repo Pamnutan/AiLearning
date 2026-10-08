@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom"; // 1. Import useNavigate
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
@@ -6,29 +6,58 @@ import {
   ShoppingCart,
   Settings,
   LogOut,
+  UserPlus,
+  Store,
+  Box,
+  BarChart3,
+  AlertTriangle,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 function Sidebar() {
-  const { logout } = useAuth();
-  const navigate = useNavigate(); // 2. Initialize the navigate function
+  const { logout, isAdmin, isVendor, userRole } = useAuth();
+  const navigate = useNavigate();
 
-  // 3. Create a handleLogout function
   const handleLogout = () => {
-    logout();             // Clears state and localStorage
-    navigate("/login");   // Redirects to the login route
+    logout();
+    navigate("/login");
   };
 
-  const menuItems = [
-    { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={20} /> },
-    { name: "Products", path: "/products", icon: <Package size={20} /> },
-    { name: "Users", path: "/users", icon: <Users size={20} /> },
-    { name: "Orders", path: "/orders", icon: <ShoppingCart size={20} /> },
-  ];
+  // Build menu items based on user role
+  const getMenuItems = () => {
+    const items = [
+      { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={20} /> },
+      { name: "Admin Panel", path: "/", icon: <Shield size={20} /> },
+    ];
+
+    if (isAdmin) {
+      items.push(
+        { name: "Manage Users", path: "/admin/users", icon: <Users size={20} /> },
+        { name: "Manage Stores", path: "/admin/stores", icon: <Store size={20} /> },
+        { name: "Manage Products", path: "/admin/products", icon: <Box size={20} /> },
+        { name: "Reports", path: "/admin/reports", icon: <BarChart3 size={20} /> }
+      );
+    } else if (isVendor) {
+      items.push(
+        { name: "My Store", path: "/vendor/store", icon: <Store size={20} /> },
+        { name: "My Products", path: "/vendor/products", icon: <Package size={20} /> },
+        { name: "My Orders", path: "/vendor/orders", icon: <ShoppingCart size={20} /> }
+      );
+    } else {
+      items.push(
+        { name: "Products", path: "/products", icon: <Package size={20} /> },
+        { name: "Orders", path: "/orders", icon: <ShoppingCart size={20} /> }
+      );
+    }
+
+    return items;
+  };
+
+  const menuItems = getMenuItems();
 
   return (
     <aside className="sidebar">
-      {/* ... keeping your logo and menu items the exact same ... */}
       <div className="sidebar-logo">
         <div className="logo-icon">D</div>
         <span>AdminPanel</span>
@@ -50,26 +79,35 @@ function Sidebar() {
         </nav>
       </div>
 
-      
-         <div className="sidebar-bottom">
-        {/* 1. Changed button to NavLink to handle visual state and routing */}
-        <NavLink 
-          to="/settings" 
-          className={({ isActive }) => `sidebar-link settings-button ${isActive ? "active" : ""}`}
-        >
-          <Settings size={20} />
-          <span>Settings</span>
-        </NavLink>
+      <div className="sidebar-section">
+        <span className="sidebar-heading">ACCOUNT</span>
+        <nav className="sidebar-nav">
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => `sidebar-link settings-button ${isActive ? "active" : ""}`}
+          >
+            <Settings size={20} />
+            <span>Settings</span>
+          </NavLink>
 
+          <button
+            className="sidebar-link logout-button"
+            onClick={handleLogout}
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </nav>
+      </div>
 
-        {/* 4. Update the onClick handler to use handleLogout */}
-        <button 
-          className="sidebar-link logout-button" 
-          onClick={handleLogout}
-        >
-          <LogOut size={20} />
-          <span>Logout</span>
-        </button>
+      {/* Role indicator */}
+      <div className="sidebar-role">
+        <span className="role-badge">
+          {userRole === 'admin' && <Shield size={14} />}
+          {userRole === 'vendor' && <Store size={14} />}
+          {userRole === 'user' && <Users size={14} />}
+          {userRole?.charAt(0).toUpperCase() + userRole?.slice(1)}
+        </span>
       </div>
     </aside>
   );

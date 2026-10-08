@@ -342,7 +342,11 @@ function Users() {
       user =>
         user.Role?.toLowerCase() === "admin"
     ).length;
-
+  const vendorUsers =
+    users.filter(
+      user =>
+        user.Role?.toLowerCase() === "vendor"
+    ).length;
   const normalUsers =
     users.filter(
       user =>
@@ -473,7 +477,7 @@ function Users() {
             STATISTICS
         ====================================================== */}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
 
 
           {/* TOTAL */}
@@ -529,6 +533,23 @@ function Users() {
 
           </div>
 
+
+          {/* VENDORS */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-500">
+                  Vendors
+                </p>
+                <p className="mt-2 text-2xl font-bold text-slate-900">
+                  {vendorUsers}
+                </p>
+              </div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <User size={21} />
+              </div>
+            </div>
+          </div>
 
           {/* NORMAL USERS */}
 
@@ -625,7 +646,9 @@ function Users() {
                   <option value="admin">
                     Administrators
                   </option>
-
+                  <option value="vendor">
+                    Vendors
+                  </option>
                   <option value="user">
                     Users
                   </option>
@@ -1286,6 +1309,9 @@ function Users() {
 
                   <option value="admin">
                     Administrator
+                  </option>
+                  <option value="vendor">
+                    Vendor
                   </option>
 
                 </select>

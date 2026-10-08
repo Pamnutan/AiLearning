@@ -19,6 +19,7 @@ const dashboardRoutes =
   const orderRoutes =
   require("./routes/orderRoutes");
   const settingsRoutes = require("./routes/settingsRoutes");
+  const storeRoutes = require("./routes/storeRoutes");
 
 
 
@@ -60,7 +61,10 @@ app.use(
   "/api/orders",
   orderRoutes
 );
-app.use("/api/settings", settingsRoutes); // Add this hook line below auth mapping
+app.use("/api/stores", storeRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/cart", require("./routes/cartRoutes"));
+app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 
 const PORT =
   process.env.PORT || 5000;

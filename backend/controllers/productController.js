@@ -6,17 +6,13 @@ const {
 async function getProducts(req, res) {
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query(`
-      SELECT
-        ProductId,
-        Name,
-        Price,
-        Category,
-        Stock,
-        CreatedAt
-      FROM Products
-      ORDER BY ProductId DESC
-    `);
+    const storeId = req.query.storeId ? Number(req.query.storeId) : null;
+    const queryStr = storeId
+      ? `SELECT ProductId, Name, Price, Category, Stock, CreatedAt FROM Products WHERE StoreId = @storeId ORDER BY ProductId DESC`
+      : `SELECT ProductId, Name, Price, Category, Stock, CreatedAt FROM Products ORDER BY ProductId DESC`;
+    const request = pool.request();
+    if (storeId) request.input('storeId', sql.Int, storeId);
+    const result = await request.query(queryStr);
     res.json(result.recordset);
   } catch (error) {
     console.error(error);
@@ -26,13 +22,50 @@ async function getProducts(req, res) {
   }
 }
 
+async function getProductById(req, res) {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({ message: "Invalid product ID" });
+    }
+
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("id", sql.Int, id)
+      .query(`
+        SELECT 
+          p.ProductId, 
+          p.Name, 
+          p.Price, 
+          p.Category, 
+          p.Stock, 
+          p.CreatedAt, 
+          s.StoreName 
+        FROM Products p
+        LEFT JOIN Stores s ON p.StoreId = s.StoreId
+        WHERE p.ProductId = @id
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(result.recordset[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch product" });
+  }
+}
+
 async function createProduct(req, res) {
   try {
     const {
       name,
       price,
       category,
-      stock
+      stock,
+      storeId
     } = req.body;
 
     if (!name || price == null || !category) {
@@ -42,17 +75,25 @@ async function createProduct(req, res) {
     }
 
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("name", sql.NVarChar(150), name)
-      .input("price", sql.Decimal(10, 2), price)
-      .input("category", sql.NVarChar(100), category)
-      .input("stock", sql.Int, stock || 0)
-      .query(`
+    const request = pool.request();
+    request.input("name", sql.NVarChar(150), name);
+    request.input("price", sql.Decimal(10, 2), price);
+    request.input("category", sql.NVarChar(100), category);
+    request.input("stock", sql.Int, stock || 0);
+    if (storeId) {
+      request.input("storeId", sql.Int, storeId);
+    }
+    const query = storeId ? `
+        INSERT INTO Products (Name, Price, Category, Stock, StoreId)
+        OUTPUT INSERTED.*
+        VALUES (@name, @price, @category, @stock, @storeId)
+      ` : `
         INSERT INTO Products (Name, Price, Category, Stock)
         OUTPUT INSERTED.*
         VALUES (@name, @price, @category, @stock)
-      `);
+      `;
+
+    const result = await request.query(query);
 
     res.status(201).json(result.recordset[0]);
   } catch (error) {
@@ -154,6 +195,7 @@ async function deleteProduct(req, res) {
 
 module.exports = {
   getProducts,
+  getProductById,
   createProduct,
   updateProduct, // Remember to export it!
   deleteProduct

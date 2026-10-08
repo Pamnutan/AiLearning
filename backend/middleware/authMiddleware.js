@@ -98,5 +98,6 @@ function authorizeRoles(...allowedRoles) {
 
 module.exports = {
   authenticateToken,
-  authorizeRoles
+  protect: authenticateToken,
+  authorize: authorizeRoles
 };

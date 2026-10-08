@@ -79,20 +79,23 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        login,
-        logout,
-        sendPasswordResetEmail,
-        resetPassword, // FIXED: Now properly exposed to your components!
-        isAuthenticated: Boolean(token),
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+      <AuthContext.Provider
+        value={{
+          user,
+          token,
+          login,
+          logout,
+          sendPasswordResetEmail,
+          resetPassword,
+          isAuthenticated: Boolean(token),
+          isAdmin: user?.role?.toLowerCase() === 'admin' || user?.Role?.toLowerCase() === 'admin',
+          isVendor: user?.role?.toLowerCase() === 'vendor' || user?.Role?.toLowerCase() === 'vendor',
+          userRole: user?.role?.toLowerCase() || user?.Role?.toLowerCase() || null,
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
+    );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

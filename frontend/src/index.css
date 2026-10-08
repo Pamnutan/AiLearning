@@ -151,6 +151,38 @@ input {
 }
 
 /* =========================
+   SIDEBAR SECTIONS
+========================= */
+
+.sidebar-section {
+  margin-bottom: 20px;
+}
+
+.sidebar-section:last-of-type {
+  margin-top: auto;
+  margin-bottom: 20px;
+}
+
+.sidebar-role {
+  margin-top: auto;
+  padding: 16px 12px;
+  border-top: 1px solid #1f2937;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #1f2937;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: capitalize;
+}
+
+/* =========================
    MAIN
 ========================= */
 

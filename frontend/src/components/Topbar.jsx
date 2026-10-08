@@ -1,15 +1,19 @@
-import { Bell, Search, Menu } from "lucide-react";
-// 1. Import the useAuth hook from your context file
-import { useAuth } from "../context/AuthContext"; // Update this path to match your folder structure
+import { Bell, Search, Menu, ShoppingCart, LogOut } from "lucide-react";
+import { useAuth } from "../context/AuthContext"; 
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Topbar() {
-  // 2. Consume the user object from the AuthContext
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  // Fallbacks in case the user data is loading or null
   const userName = user?.name || "Guest";
   const userRole = user?.role || "User";
   const userInitials = userName.charAt(0).toUpperCase();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <header className="topbar">
@@ -23,6 +27,14 @@ function Topbar() {
       </div>
       
       <div className="topbar-right">
+        <NavLink 
+          to="/cart" 
+          className="notification-button" 
+          style={{ position: 'relative' }}
+        >
+          <ShoppingCart size={20} />
+        </NavLink>
+        
         <button className="notification-button">
           <Bell size={20} />
           <span className="notification-dot"></span>
@@ -33,11 +45,19 @@ function Topbar() {
             {userInitials} 
           </div> 
           
-          {/* Displaying dynamic information from AuthContext */}
           <div className="user-info">
             <strong>{userName}</strong>
             <span>{userRole}</span>
           </div>
+
+          <button 
+            onClick={handleLogout} 
+            className="logout-button" 
+            title="Logout"
+            style={{ marginLeft: '10px', cursor: 'pointer', border: 'none', background: 'none', color: '#ef4444' }}
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </div>
     </header>
