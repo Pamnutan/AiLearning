@@ -32,6 +32,14 @@ function AdminUsers() {
     setEditingUser(null); setForm(emptyForm); setShowForm(true); setError("");
   }
 
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this user?")) return;
+    try {
+      await api.delete("/users/" + id);
+      await fetchUsers();
+    } catch (err) { alert(err.response?.data?.message || "Failed to delete user."); }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     try {
@@ -102,7 +110,7 @@ function AdminUsers() {
         </div>
         <table className="w-full">
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-            <tr><th className="px-5 py-3">Name</th><th>Email</th><th>Role</th><th>Created</th></tr>
+            <tr><th className="px-5 py-3">Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm">
             {filteredUsers.map(u => (
@@ -111,6 +119,10 @@ function AdminUsers() {
                 <td className="px-5 py-3 text-slate-600">{u.Email}</td>
                 <td className="px-5 py-3 capitalize">{u.Role}</td>
                 <td className="px-5 py-3 text-slate-400">{new Date(u.CreatedAt).toLocaleDateString('en-IN')}</td>
+                <td className="px-5 py-3">
+                  <button onClick={() => { setEditingUser(u); setForm({ name: u.Name, email: u.Email, role: u.Role, password: "" }); setShowForm(true); setError(""); }} className="text-blue-600 hover:underline text-xs font-bold mr-3">Edit</button>
+                  <button onClick={() => handleDelete(u.Id)} className="text-red-600 hover:underline text-xs font-bold">Delete</button>
+                </td>
               </tr>
             ))}
           </tbody>

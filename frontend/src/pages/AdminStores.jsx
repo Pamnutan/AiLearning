@@ -6,6 +6,7 @@ function AdminStores() {
   const [stores, setStores] = useState([]);
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ storeName: "", description: "", vendorId: "" });
+  const [editingStore, setEditingStore] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
@@ -21,11 +22,25 @@ function AdminStores() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      await api.post("/stores", { ...form, vendorId: Number(form.vendorId) });
+      if (editingStore) {
+        await api.put("/stores/" + editingStore.StoreId, { ...form, vendorId: Number(form.vendorId) });
+      } else {
+        await api.post("/stores", { ...form, vendorId: Number(form.vendorId) });
+      }
       const r = await api.get("/stores");
       setStores(r.data);
       setShowForm(false);
       setForm({ storeName: "", description: "", vendorId: "" });
+      setEditingStore(null);
+    } catch (err) { alert(err.response?.data?.message || "Failed"); }
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this store?")) return;
+    try {
+      await api.delete("/stores/" + id);
+      const r = await api.get("/stores");
+      setStores(r.data);
     } catch (err) { alert(err.response?.data?.message || "Failed"); }
   }
 
@@ -44,22 +59,29 @@ function AdminStores() {
               <div><h3 className="font-bold text-lg">{s.StoreName}</h3><p className="text-xs text-slate-400">Vendor ID: {s.VendorId}</p></div>
             </div>
             <p className="text-sm text-slate-600">{s.Description || "No description"}</p>
+            <div className="flex gap-3 mt-3">
+              <button onClick={() => { setEditingStore(s); setForm({ storeName: s.StoreName, description: s.Description || "", vendorId: s.VendorId ? String(s.VendorId) : "" }); setShowForm(true); }} className="text-blue-600 hover:underline text-xs font-bold">Edit</button>
+              <button onClick={() => handleDelete(s.StoreId)} className="text-red-600 hover:underline text-xs font-bold">Delete</button>
+            </div>
           </div>
         ))}
       </div>
       {showForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={e => e.target === e.currentTarget && setShowForm(false)}>
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl space-y-4">
-            <h2 className="text-xl font-bold">Create Store for Vendor</h2>
+            <h2 className="text-xl font-bold">{editingStore ? "Edit Store" : "Create Store for Vendor"}</h2>
             <input placeholder="Store Name" value={form.storeName} onChange={e => setForm({...form, storeName: e.target.value})} className="w-full border rounded-xl px-4 py-2.5" required/>
             <textarea placeholder="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="w-full border rounded-xl px-4 py-2.5" rows={3}/>
             <select value={form.vendorId} onChange={e => setForm({...form, vendorId: e.target.value})} className="w-full border rounded-xl px-4 py-2.5" required>
               <option value="">Select Vendor</option>
-              {users.filter(u => !stores.some(s => s.VendorId === u.Id)).map(u => <option key={u.Id} value={u.Id}>{u.Name} ({u.Email})</option>)}
+              {users.filter(u => {
+                const isEditingOwnStore = editingStore && editingStore.VendorId === u.Id;
+                return isEditingOwnStore || !stores.some(s => s.VendorId === u.Id && s.StoreId !== (editingStore?.StoreId || 0));
+              }).map(u => <option key={u.Id} value={u.Id}>{u.Name} ({u.Email})</option>)}
             </select>
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={() => setShowForm(false)} className="flex-1 border rounded-xl py-2.5 text-sm">Cancel</button>
-              <button type="submit" className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-bold">Create</button>
+              <button type="submit" className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-bold">{editingStore ? "Update" : "Create"}</button>
             </div>
           </form>
         </div>

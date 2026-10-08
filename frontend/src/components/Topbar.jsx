@@ -3,11 +3,10 @@ import { useAuth } from "../context/AuthContext";
 import { NavLink, useNavigate } from "react-router-dom";
 
 function Topbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, userRole } = useAuth();
   const navigate = useNavigate();
 
   const userName = user?.name || "Guest";
-  const userRole = user?.role || "User";
   const userInitials = userName.charAt(0).toUpperCase();
 
   const handleLogout = () => {
@@ -27,13 +26,15 @@ function Topbar() {
       </div>
       
       <div className="topbar-right">
-        <NavLink 
-          to="/cart" 
-          className="notification-button" 
-          style={{ position: 'relative' }}
-        >
-          <ShoppingCart size={20} />
-        </NavLink>
+        {userRole !== 'admin' && userRole !== 'vendor' && (
+          <NavLink
+            to="/cart"
+            className="notification-button"
+            style={{ position: 'relative' }}
+          >
+            <ShoppingCart size={20} />
+          </NavLink>
+        )}
         
         <button className="notification-button">
           <Bell size={20} />

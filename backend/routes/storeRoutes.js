@@ -4,7 +4,8 @@ const {
   createStore,
   getStore,
   getAllStores,
-  updateStore
+  updateStore,
+  deleteStore
 } = require('../controllers/storeController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -17,6 +18,7 @@ router.route('/')
 
 router.route('/:id')
   .get(getStore)
-  .put(authorize('vendor'), updateStore);
+  .put(authorize('admin', 'vendor'), updateStore)
+  .delete(authorize('admin', 'vendor'), deleteStore);
 
 module.exports = router;

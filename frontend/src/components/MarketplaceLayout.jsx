@@ -1,9 +1,9 @@
-import { Bell, Search, Menu, ShoppingCart, LogOut, Store, Heart } from "lucide-react";
+import { Bell, Search, Menu, ShoppingCart, LogOut, Store, Heart, LayoutDashboard } from "lucide-react";
 import { useAuth } from "../context/AuthContext"; 
 import { NavLink, useNavigate, Link } from "react-router-dom";
 
 const MarketplaceLayout = ({ children }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, userRole } = useAuth();
   const navigate = useNavigate();
 
   const userName = user?.name || "Guest";
@@ -41,21 +41,33 @@ const MarketplaceLayout = ({ children }) => {
                 </button>
               </div>
 
-              <NavLink 
-                to="/wishlist" 
+              <NavLink
+                to={userRole === 'admin' ? '/' : userRole === 'vendor' ? '/vendor/dashboard' : '/orders'}
                 className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600'}`}
               >
-                <Heart size={20} />
-                <span className="hidden sm:inline">Wishlist</span>
+                <LayoutDashboard size={20} />
+                <span className="hidden sm:inline">Dashboard</span>
               </NavLink>
-              
-              <NavLink 
-                to="/cart" 
-                className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600'}`}
-              >
-                <ShoppingCart size={20} />
-                <span className="hidden sm:inline">Cart</span>
-              </NavLink>
+
+              {userRole !== 'admin' && userRole !== 'vendor' && (
+                <NavLink
+                  to="/wishlist"
+                  className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600'}`}
+                >
+                  <Heart size={20} />
+                  <span className="hidden sm:inline">Wishlist</span>
+                </NavLink>
+              )}
+
+              {userRole !== 'admin' && userRole !== 'vendor' && (
+                <NavLink
+                  to="/cart"
+                  className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600'}`}
+                >
+                  <ShoppingCart size={20} />
+                  <span className="hidden sm:inline">Cart</span>
+                </NavLink>
+              )}
             </div>
           </div>
         </div>

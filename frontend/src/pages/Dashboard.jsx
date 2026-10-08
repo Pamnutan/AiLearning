@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 import {
   Users,
@@ -11,6 +13,11 @@ import StatCard from "../components/StatCard";
 import api from "../services/api";
 
 function Dashboard() {
+  const { userRole } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (userRole === 'user') { navigate('/orders', { replace: true }); }
+  }, [userRole, navigate]);
 
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -396,7 +403,7 @@ export default Dashboard;
 // import StatCard from "../components/StatCard";
 
 // function Dashboard() {
-//   return (
+  // function Dashboard() {
 //     <div>
 
 //       <div className="page-header">
@@ -554,8 +561,7 @@ export default Dashboard;
 //   from "../components/StatCard";
 
 // function Dashboard() {
-
-//   const [stats, setStats] =
+  // function Dashboard() {
 //     useState(null);
 
 //   const [loading, setLoading] =

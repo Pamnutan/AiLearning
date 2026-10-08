@@ -8,6 +8,7 @@ function AdminProducts() {
   const [vendors, setVendors] = useState([]);
   const [form, setForm] = useState({ name: "", price: "", category: "", stock: "", storeId: "" });
   const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -19,12 +20,26 @@ function AdminProducts() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const payload = { ...form, price: Number(form.price), stock: Number(form.stock || 0) };
-      await api.post("/products", payload);
+      const payload = { ...form, price: Number(form.price), stock: Number(form.stock || 0), storeId: form.storeId ? Number(form.storeId) : 0 };
+      if (editingProduct) {
+        await api.put("/products/" + editingProduct.ProductId, payload);
+      } else {
+        await api.post("/products", payload);
+      }
       const r = await api.get("/products");
       setProducts(r.data);
       setShowForm(false);
       setForm({ name: "", price: "", category: "", stock: "", storeId: "" });
+      setEditingProduct(null);
+    } catch (err) { alert(err.response?.data?.message || "Failed"); }
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this product?")) return;
+    try {
+      await api.delete("/products/" + id);
+      const r = await api.get("/products");
+      setProducts(r.data);
     } catch (err) { alert(err.response?.data?.message || "Failed"); }
   }
 
@@ -60,7 +75,7 @@ function AdminProducts() {
       <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-            <tr><th className="px-5 py-3">Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th></tr>
+            <tr><th className="px-5 py-3">Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filtered.map(p => (
@@ -69,6 +84,10 @@ function AdminProducts() {
                 <td className="px-5 py-3">{p.Category}</td>
                 <td className="px-5 py-3">₹{Number(p.Price).toLocaleString('en-IN')}</td>
                 <td className="px-5 py-3">{p.Stock}</td>
+                <td className="px-5 py-3">
+                  <button onClick={() => { setEditingProduct(p); setForm({ name: p.Name, price: p.Price, category: p.Category, stock: p.Stock, storeId: p.StoreId || "" }); setShowForm(true); }} className="text-blue-600 hover:underline text-xs font-bold mr-3">Edit</button>
+                  <button onClick={() => handleDelete(p.ProductId)} className="text-red-600 hover:underline text-xs font-bold">Delete</button>
+                </td>
                 <td className="px-5 py-3">
                   <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${p.Stock < 10 ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
                     {p.Stock < 10 ? 'LOW STOCK' : 'OK'}
@@ -83,7 +102,7 @@ function AdminProducts() {
       {showForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={e => e.target === e.currentTarget && setShowForm(false)}>
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl space-y-4">
-            <h2 className="text-xl font-bold">Add Product</h2>
+            <h2 className="text-xl font-bold">{editingProduct ? "Edit Product" : "Add Product"}</h2>
             <input placeholder="Product Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full border rounded-xl px-4 py-2.5" required/>
             <input placeholder="Price" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="w-full border rounded-xl px-4 py-2.5" required/>
             <input placeholder="Category" value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full border rounded-xl px-4 py-2.5" required/>
@@ -94,7 +113,7 @@ function AdminProducts() {
             </select>
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={() => setShowForm(false)} className="flex-1 border rounded-xl py-2.5 text-sm">Cancel</button>
-              <button type="submit" className="flex-1 bg-indigo-600 text-white rounded-xl py-2.5 text-sm font-bold">Save</button>
+              <button type="submit" className="flex-1 bg-indigo-600 text-white rounded-xl py-2.5 text-sm font-bold">{editingProduct ? "Update" : "Save"}</button>
             </div>
           </form>
         </div>

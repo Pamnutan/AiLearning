@@ -39,12 +39,14 @@ import Wishlist from "./pages/Wishlist";
 import VendorStore from "./pages/VendorStore";
 import VendorProducts from "./pages/VendorProducts";
 import VendorOrders from "./pages/VendorOrders";
+import VendorDashboard from "./pages/VendorDashboard";
 
 import AdminUsers from "./pages/AdminUsers";
 import AdminStores from "./pages/AdminStores";
 import AdminProducts from "./pages/AdminProducts";
 import AdminReports from "./pages/AdminReports";
 import AdminRoute from "./components/AdminRoute";
+import ShopperOnly from "./components/ShopperOnly";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -62,14 +64,21 @@ function App() {
         } />
         <Route path="/store/:id" element={<MarketplaceLayout><StoreDetails /></MarketplaceLayout>} />
         <Route path="/product/:id" element={<MarketplaceLayout><ProductDetails /></MarketplaceLayout>} />
-        <Route path="/cart" element={<MarketplaceLayout><Cart /></MarketplaceLayout>} />
-        <Route path="/wishlist" element={<MarketplaceLayout><Wishlist /></MarketplaceLayout>} />
+        <Route path="/cart" element={<MarketplaceLayout><ShopperOnly><Cart /></ShopperOnly></MarketplaceLayout>} />
+        <Route path="/wishlist" element={<MarketplaceLayout><ShopperOnly><Wishlist /></ShopperOnly></MarketplaceLayout>} />
         
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
         {/* Vendor Seller Center */}
+        <Route path="/vendor/dashboard" element={
+          <ProtectedRoute>
+            <Layout>
+              <VendorDashboard />
+            </Layout>
+          </ProtectedRoute>
+        } />
         <Route
           path="/vendor/store"
           element={

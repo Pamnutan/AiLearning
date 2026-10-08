@@ -26,10 +26,22 @@ function Sidebar() {
 
   // Build menu items based on user role
   const getMenuItems = () => {
-    const items = [
-      { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={20} /> },
-      { name: "Admin Panel", path: "/", icon: <Shield size={20} /> },
-    ];
+    const items = [];
+
+    if (isAdmin) {
+      items.push(
+        { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={20} /> },
+        { name: "Admin Panel", path: "/", icon: <Shield size={20} /> }
+      );
+    } else if (isVendor) {
+      items.push(
+        { name: "Vendor Dashboard", path: "/vendor/dashboard", icon: <LayoutDashboard size={20} /> }
+      );
+    } else {
+      items.push(
+        { name: "My Orders", path: "/orders", icon: <ShoppingCart size={20} /> }
+      );
+    }
 
     if (isAdmin) {
       items.push(
@@ -43,11 +55,6 @@ function Sidebar() {
         { name: "My Store", path: "/vendor/store", icon: <Store size={20} /> },
         { name: "My Products", path: "/vendor/products", icon: <Package size={20} /> },
         { name: "My Orders", path: "/vendor/orders", icon: <ShoppingCart size={20} /> }
-      );
-    } else {
-      items.push(
-        { name: "Products", path: "/products", icon: <Package size={20} /> },
-        { name: "Orders", path: "/orders", icon: <ShoppingCart size={20} /> }
       );
     }
 

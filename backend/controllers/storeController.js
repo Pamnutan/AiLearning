@@ -76,14 +76,19 @@ async function updateStore(req, res) {
 
     const pool = await poolPromise;
     
-    // Verify store ownership
-    const storeCheck = await pool.request()
-      .input('id', sql.Int, id)
-      .input('vendorId', sql.Int, vendorId)
-      .query('SELECT StoreId FROM Stores WHERE StoreId = @id AND VendorId = @vendorId');
+    const userRole = req.user?.role || req.user?.Role || '';
+    const isAdmin = userRole.toLowerCase() === 'admin';
 
-    if (storeCheck.recordset.length === 0) {
-      return res.status(403).json({ message: 'Unauthorized to update this store' });
+    // Verify store ownership (skip for admin)
+    if (!isAdmin) {
+      const storeCheck = await pool.request()
+        .input('id', sql.Int, id)
+        .input('vendorId', sql.Int, vendorId)
+        .query('SELECT StoreId FROM Stores WHERE StoreId = @id AND VendorId = @vendorId');
+
+      if (storeCheck.recordset.length === 0) {
+        return res.status(403).json({ message: 'Unauthorized to update this store' });
+      }
     }
 
     const result = await pool.request()
@@ -107,9 +112,22 @@ async function updateStore(req, res) {
   }
 }
 
+async function deleteStore(req, res) {
+  try {
+    const { id } = req.params;
+    const pool = await poolPromise;
+    await pool.request().input('id', sql.Int, id).query('DELETE FROM Stores WHERE StoreId = @id');
+    res.json({ message: 'Store deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to delete store' });
+  }
+}
+
 module.exports = {
   createStore,
   getStore,
   getAllStores,
-  updateStore
+  updateStore,
+  deleteStore
 };

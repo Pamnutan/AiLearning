@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { productService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { storeService, productService } from '../services/api';
 
 const VendorProducts = () => {
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -14,10 +16,11 @@ const VendorProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await productService.getProducts();
-      // Filter products belonging to the current vendor
-      // (Backend already returns StoreName, but we need to filter by the current user's store)
-      // This is simplified for the demo.
+      const storesRes = await storeService.getAllStores();
+      const userId = user?.id || user?.userId || parseInt(localStorage.getItem('user_id') || '0');
+      const myStore = storesRes.data.find(s => s.VendorId === userId);
+      const storeId = myStore?.StoreId || 0;
+      const res = await productService.getProducts({ storeId: storeId });
       setProducts(res.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -30,11 +33,16 @@ const VendorProducts = () => {
     e.preventDefault();
     setMessage('');
     try {
+      // Ensure storeId is set to vendor's store
+      const storesRes = await storeService.getAllStores();
+      const userId = user?.id || user?.userId || parseInt(localStorage.getItem('user_id') || '0');
+      const myStore = storesRes.data.find(s => s.VendorId === userId);
+      const payload = { ...formData, price: Number(formData.price), stock: Number(formData.stock || 0), storeId: myStore?.StoreId || formData.storeId || 0 };
       if (formData.ProductId) {
-        await productService.updateProduct(formData.ProductId, formData);
+        await productService.updateProduct(formData.ProductId, payload);
         setMessage('Product updated!');
       } else {
-        await productService.createProduct(formData);
+        await productService.createProduct(payload);
         setMessage('Product created!');
       }
       setShowForm(false);
@@ -102,12 +110,10 @@ const VendorProducts = () => {
               onChange={(e) => setFormData({...formData, stock: e.target.value})}
               required
             />
-            <input 
-              placeholder="Store ID" 
-              className="p-2 border rounded-lg"
+            <input
+              type="hidden"
               value={formData.storeId}
               onChange={(e) => setFormData({...formData, storeId: e.target.value})}
-              required
             />
             <div className="flex gap-2">
               <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">Save</button>
@@ -128,8 +134,16 @@ const VendorProducts = () => {
             <div className="flex gap-2">
               <button 
                 onClick={() => {
-                  setFormData(product);
+                  setFormData({
+                    ProductId: product.ProductId,
+                    name: product.Name || '',
+                    price: product.Price || '',
+                    category: product.Category || '',
+                    stock: product.Stock || '',
+                    storeId: product.StoreId || ''
+                  });
                   setShowForm(true);
+                  setMessage('');
                 }}
                 className="text-blue-600 hover:underline text-sm"
               >

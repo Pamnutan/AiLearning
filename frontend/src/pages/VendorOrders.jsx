@@ -47,18 +47,18 @@ const VendorOrders = () => {
           </thead>
           <tbody>
             {orders.map(order => (
-              <tr key={order.OrderId} className="border-b hover:bg-gray-50">
-                <td className="p-4">#{order.OrderId}</td>
-                <td className="p-4">{order.CustomerId}</td>
+              <tr key={order.Id} className="border-b hover:bg-gray-50">
+                <td className="p-4">#{order.Id}</td>
+                <td className="p-4">{order.UserId}</td>
                 <td className="p-4">{new Date(order.CreatedAt).toLocaleDateString()}</td>
                 <td className="p-4">
                   <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700">
-                    {order.OrderStatus}
+                    {order.Status}
                   </span>
                 </td>
                 <td className="p-4">
-                  <select 
-                    onChange={(e) => updateStatus(order.OrderId, e.target.value)}
+                  <select
+                    onChange={(e) => updateStatus(order.Id, e.target.value)}
                     className="p-1 border rounded text-sm"
                   >
                     <option value="">Update Status</option>
