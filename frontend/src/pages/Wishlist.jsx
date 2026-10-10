@@ -85,7 +85,7 @@ const Wishlist = () => {
                   onClick={() => handleRemove(item.WishlistItemId)}
                   className="p-2 border rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>

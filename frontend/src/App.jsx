@@ -1,7 +1,8 @@
 import {
   BrowserRouter,
   Routes,
-  Route
+  Route,
+  Navigate
 } from "react-router-dom";
 
 import Layout
@@ -50,7 +51,7 @@ import ShopperOnly from "./components/ShopperOnly";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
-  const { isAdmin, isAuthenticated } = useAuth();
+  const { isAdmin, isVendor, isAuthenticated } = useAuth();
   return (
     <BrowserRouter>
       <Routes>
@@ -58,14 +59,16 @@ function App() {
         <Route path="/" element={
           isAdmin ? (
             <Layout><Dashboard /></Layout>
+          ) : isVendor ? (
+            <Navigate to="/vendor/dashboard" replace />
           ) : (
             <MarketplaceLayout><Home /></MarketplaceLayout>
           )
         } />
-        <Route path="/store/:id" element={<MarketplaceLayout><StoreDetails /></MarketplaceLayout>} />
-        <Route path="/product/:id" element={<MarketplaceLayout><ProductDetails /></MarketplaceLayout>} />
-        <Route path="/cart" element={<MarketplaceLayout><ShopperOnly><Cart /></ShopperOnly></MarketplaceLayout>} />
-        <Route path="/wishlist" element={<MarketplaceLayout><ShopperOnly><Wishlist /></ShopperOnly></MarketplaceLayout>} />
+        <Route path="/store/:id" element={isVendor ? <Navigate to="/vendor/dashboard" replace /> : <MarketplaceLayout><StoreDetails /></MarketplaceLayout>} />
+        <Route path="/product/:id" element={isVendor ? <Navigate to="/vendor/dashboard" replace /> : <MarketplaceLayout><ProductDetails /></MarketplaceLayout>} />
+        <Route path="/cart" element={isVendor ? <Navigate to="/vendor/dashboard" replace /> : <MarketplaceLayout><ShopperOnly><Cart /></ShopperOnly></MarketplaceLayout>} />
+        <Route path="/wishlist" element={isVendor ? <Navigate to="/vendor/dashboard" replace /> : <MarketplaceLayout><ShopperOnly><Wishlist /></ShopperOnly></MarketplaceLayout>} />
         
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />

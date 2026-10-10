@@ -218,8 +218,8 @@ function Dashboard() {
           title="Total Orders"
           value={stats.totalOrders}
           icon={
-            <ShoppingCart size={24} />
-          }
+                      <ShoppingCart size={20} />
+                    }
           color="#f59e0b"
           description="Orders received"
         />
@@ -233,8 +233,8 @@ function Dashboard() {
             )
           }
           icon={
-            <IndianRupee size={24} />
-          }
+                      <IndianRupee size={20} />
+                    }
           color="#ef4444"
           description="Completed order revenue"
         />

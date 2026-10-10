@@ -38,7 +38,7 @@ function Login() {
 
     try {
       await login(email, password);
-      
+
       // Save or remove email based on Remember Me checkbox
       if (rememberMe) {
         localStorage.setItem("remembered_email", email);
@@ -47,6 +47,11 @@ function Login() {
       }
 
       navigate("/");
+      // Redirect vendor to vendor dashboard after login
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+      if ((userData?.role || userData?.Role)?.toLowerCase() === 'vendor') {
+        navigate("/vendor/dashboard", { replace: true });
+      }
     } catch (error) {
       setError(
         error.response?.data?.message || "Login failed. Please check your credentials."

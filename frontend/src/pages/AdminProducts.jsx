@@ -75,13 +75,14 @@ function AdminProducts() {
       <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-            <tr><th className="px-5 py-3">Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+            <tr><th className="px-5 py-3">Name</th><th>Category</th><th>Vendor</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filtered.map(p => (
               <tr key={p.ProductId} className="hover:bg-slate-50">
                 <td className="px-5 py-3 font-medium">{p.Name}</td>
                 <td className="px-5 py-3">{p.Category}</td>
+                <td className="px-5 py-3">{p.VendorName || '—'}</td>
                 <td className="px-5 py-3">₹{Number(p.Price).toLocaleString('en-IN')}</td>
                 <td className="px-5 py-3">{p.Stock}</td>
                 <td className="px-5 py-3">

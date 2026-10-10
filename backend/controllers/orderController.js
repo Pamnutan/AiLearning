@@ -228,10 +228,20 @@ async function getOrder(req, res) {
     // For admin: return any order. For vendor/user: restrict access
     let queryStr = `
       SELECT o.Id, o.UserId, o.TotalAmount, o.Status, o.CreatedAt,
-             (SELECT STRING_AGG(p.Name + ' (x' + CAST(oi.Quantity AS VARCHAR) + ')', ', ') FROM OrderItems oi JOIN Products p ON oi.ProductId = p.ProductId WHERE oi.OrderId = o.Id) AS Products,
+             u.Name as UserName, u.Email,
              (SELECT COUNT(*) FROM OrderItems WHERE OrderId = o.Id) as ItemCount
       FROM Orders o
+      LEFT JOIN Users u ON o.UserId = u.Id
       WHERE o.Id = @id
+    `;
+
+    // Get order items separately
+    const itemsQuery = `
+      SELECT oi.Id, p.Name as ProductName, oi.Quantity, oi.Price,
+             (oi.Quantity * oi.Price) as Subtotal
+      FROM OrderItems oi
+      JOIN Products p ON oi.ProductId = p.ProductId
+      WHERE oi.OrderId = @id
     `;
 
     if (user.role !== 'admin') {
@@ -239,11 +249,12 @@ async function getOrder(req, res) {
       if (user.role === 'vendor') {
         queryStr = `
           SELECT DISTINCT o.Id, o.UserId, o.TotalAmount, o.Status, o.CreatedAt,
-                 (SELECT STRING_AGG(p.Name + ' (x' + CAST(oi.Quantity AS VARCHAR) + ')', ', ') FROM OrderItems oi JOIN Products p ON oi.ProductId = p.ProductId WHERE oi.OrderId = o.Id) AS Products,
+                 u.Name as UserName, u.Email,
                  (SELECT COUNT(*) FROM OrderItems WHERE OrderId = o.Id) as ItemCount
           FROM Orders o
           JOIN OrderItems oi ON o.Id = oi.OrderId
           JOIN Stores s ON oi.StoreId = s.StoreId
+          LEFT JOIN Users u ON o.UserId = u.Id
           WHERE o.Id = @id AND s.VendorId = @vendorId
         `;
         const result = await pool.request()
@@ -251,7 +262,12 @@ async function getOrder(req, res) {
           .input('vendorId', sql.Int, user.userId || user.id)
           .query(queryStr);
         if (result.recordset.length === 0) return res.status(404).json({ message: 'Order not found' });
-        return res.json(result.recordset[0]);
+        
+        const itemsResult = await pool.request()
+          .input('id', sql.Int, id)
+          .query(itemsQuery);
+        
+        return res.json({ order: result.recordset[0], items: itemsResult.recordset });
       } else {
         queryStr += ' AND o.UserId = @userId';
         const result = await pool.request()
@@ -259,13 +275,23 @@ async function getOrder(req, res) {
           .input('userId', sql.Int, user.userId || user.id)
           .query(queryStr);
         if (result.recordset.length === 0) return res.status(404).json({ message: 'Order not found' });
-        return res.json(result.recordset[0]);
+
+        const itemsResult = await pool.request()
+          .input('id', sql.Int, id)
+          .query(itemsQuery);
+
+        return res.json({ order: result.recordset[0], items: itemsResult.recordset });
       }
     }
 
     const result = await pool.request().input('id', sql.Int, id).query(queryStr);
     if (result.recordset.length === 0) return res.status(404).json({ message: 'Order not found' });
-    res.json(result.recordset[0]);
+
+    const itemsResult = await pool.request()
+      .input('id', sql.Int, id)
+      .query(itemsQuery);
+
+    res.json({ order: result.recordset[0], items: itemsResult.recordset });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to fetch order details' });

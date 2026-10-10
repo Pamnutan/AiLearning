@@ -114,7 +114,7 @@ const Home = () => {
                   onClick={() => handleAddToWishlist(product)}
                   className="p-2 border rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
                 >
-                  <Heart size={18} />
+                  <Heart size={16} />
                 </button>
               </div>
             </div>

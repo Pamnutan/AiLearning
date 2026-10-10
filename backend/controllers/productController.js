@@ -8,8 +8,8 @@ async function getProducts(req, res) {
     const pool = await poolPromise;
     const storeId = req.query.storeId ? Number(req.query.storeId) : null;
     const queryStr = storeId
-      ? `SELECT ProductId, Name, Price, Category, Stock, CreatedAt FROM Products WHERE StoreId = @storeId ORDER BY ProductId DESC`
-      : `SELECT ProductId, Name, Price, Category, Stock, CreatedAt FROM Products ORDER BY ProductId DESC`;
+      ? `SELECT p.ProductId, p.Name, p.Price, p.Category, p.Stock, p.CreatedAt, p.StoreId, s.StoreName, s.VendorId, u.Name as VendorName FROM Products p LEFT JOIN Stores s ON p.StoreId = s.StoreId LEFT JOIN Users u ON s.VendorId = u.Id WHERE p.StoreId = @storeId ORDER BY p.ProductId DESC`
+      : `SELECT p.ProductId, p.Name, p.Price, p.Category, p.Stock, p.CreatedAt, p.StoreId, s.StoreName, s.VendorId, u.Name as VendorName FROM Products p LEFT JOIN Stores s ON p.StoreId = s.StoreId LEFT JOIN Users u ON s.VendorId = u.Id ORDER BY p.ProductId DESC`;
     const request = pool.request();
     if (storeId) request.input('storeId', sql.Int, storeId);
     const result = await request.query(queryStr);
