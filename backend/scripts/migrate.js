@@ -68,6 +68,15 @@ async function migrate() {
       END
     `);
 
+    // 4b. Add Status to OrderItems (for per-item vendor updates)
+    await pool.request().query(`
+      IF NOT EXISTS (SELECT * FROM sys.columns WHERE name = 'Status' AND object_id = OBJECT_ID('OrderItems'))
+      BEGIN
+        ALTER TABLE OrderItems ADD Status NVARCHAR(50) DEFAULT 'Pending';
+        PRINT 'Status column added to OrderItems.';
+      END
+    `);
+
     // 5. Create CartItems Table
     await pool.request().query(`
       IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'CartItems')

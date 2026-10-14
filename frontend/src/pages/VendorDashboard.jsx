@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Store, Plus, Package, ShoppingCart, Boxes, AlertTriangle, Edit3, CheckCircle2, Clock3, Truck, XCircle } from "lucide-react";
 import { storeService, productService, orderService } from "../services/api";
+import api from "../services/api";
 
 function VendorDashboard() {
   const { user } = useAuth();
@@ -9,6 +10,7 @@ function VendorDashboard() {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [message, setMessage] = useState("");
+  const [reportData, setReportData] = useState([]);
   const [storeForm, setStoreForm] = useState({ storeName: "", description: "", logo: "" });
   const [showStoreForm, setShowStoreForm] = useState(false);
 
@@ -18,6 +20,13 @@ function VendorDashboard() {
   useEffect(() => {
     loadData();
   }, []);
+
+  async function fetchReport(period) {
+    try {
+      const res = await api.get(`/reports/vendor-sales?period=${period}`);
+      setReportData(res.data.data || []);
+    } catch (e) { console.error(e); }
+  }
 
   async function loadData() {
     try {
@@ -149,6 +158,17 @@ function VendorDashboard() {
           ))}
           {orders.length === 0 && <p className="text-slate-400">No orders yet.</p>}
         </div>
+      </div>
+
+      {/* Vendor Sale Report */}
+      <div className="mt-10 bg-white rounded-2xl shadow-sm p-6">
+        <h2 className="text-xl font-bold mb-4">Product Sale Report</h2>
+        <div className="flex gap-2 mb-4">
+          <button onClick={() => fetchReport('daily')} className="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">Daily</button>
+          <button onClick={() => fetchReport('monthly')} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-md text-sm">Monthly</button>
+          <button onClick={() => fetchReport('yearly')} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-md text-sm">Yearly</button>
+        </div>
+        <table className="w-full text-sm"><thead><tr><th className="text-left">Product</th><th>Qty</th><th>Revenue</th></tr></thead><tbody>{reportData.map(r => <tr key={r.ProductName}><td>{r.ProductName}</td><td>{r.TotalQty}</td><td>₹{r.Revenue}</td></tr>)}</tbody></table>
       </div>
     </div>
   );

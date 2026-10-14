@@ -55,7 +55,7 @@ export const wishlistService = {
 export const orderService = {
   createOrder: (data) => api.post("/orders", data),
   getMyOrders: () => api.get("/orders"),
-  getVendorOrders: () => api.get("/orders"),
+  getVendorOrders: () => api.get("/orders/vendor"),
   updateOrderItemStatus: (itemId, status) => api.put(`/orders/item/${itemId}`, { status }),
 };
 

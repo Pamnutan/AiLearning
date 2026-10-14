@@ -21,7 +21,8 @@ import {
   IndianRupee,
   Hash,
   Truck,
-  Loader2
+  Loader2,
+  Store
 } from "lucide-react";
 
 import api from "../services/api";
@@ -2124,33 +2125,49 @@ function Orders() {
 
                             <div className="min-w-0">
 
-                              <p className="
-                                truncate
-                                font-semibold
-                                text-slate-900
-                              ">
+                                                          <p className="
+                                                            truncate
+                                                            font-semibold
+                                                            text-slate-900
+                                                          ">
 
-                                {item.ProductName}
+                                                            {item.ProductName}
 
-                              </p>
+                                                          </p>
 
-                              <p className="
-                                mt-1
-                                text-xs
-                                text-slate-500
-                              ">
+                                                          {item.StoreName && (
+                                                                                          <p className="mt-0.5 text-[10px] text-slate-400">
+                                                                                            {item.StoreName}{item.VendorName ? ` • ${item.VendorName}` : ""}
+                                                                                          </p>
+                                                                                        )}
 
-                                {item.Quantity}
+                                                          <p className="
+                                                            mt-1
+                                                            text-xs
+                                                            text-slate-500
+                                                          ">
 
-                                {" × "}
+                                                            {item.Quantity}
 
-                                {formatPrice(
-                                  item.Price
-                                )}
+                                                            {" × "}
 
-                              </p>
+                                                            {formatPrice(
+                                                              item.Price
+                                                            )}
 
-                            </div>
+                                                            </p>
+
+                                                            {item.Status && (
+                                                            <span className={`mt-1 inline-block text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                                                              item.Status === 'Completed' ? 'bg-green-100 text-green-700' :
+                                                              item.Status === 'Processing' ? 'bg-blue-100 text-blue-700' :
+                                                              'bg-amber-100 text-amber-700'
+                                                            }`}>
+                                                              {item.Status}
+                                                            </span>
+                                                            )}
+
+                                                        </div>
 
                           </div>
 

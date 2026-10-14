@@ -20,6 +20,7 @@ const dashboardRoutes =
   require("./routes/orderRoutes");
   const settingsRoutes = require("./routes/settingsRoutes");
   const storeRoutes = require("./routes/storeRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 
 
 
@@ -65,6 +66,7 @@ app.use("/api/stores", storeRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/wishlist", require("./routes/wishlistRoutes"));
+app.use("/api/reports", reportRoutes);
 
 const PORT =
   process.env.PORT || 5000;

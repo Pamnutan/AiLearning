@@ -13,11 +13,11 @@ router.route('/')
   .post(protect, createOrder)
   .get(protect, getOrders);
 
-router.route('/:id')
-  .get(protect, getOrder);
-
 router.route('/vendor')
   .get(protect, authorize('vendor', 'admin'), getVendorOrders);
+
+router.route('/:id')
+  .get(protect, getOrder);
 
 router.route('/item/:orderItemId')
   .put(protect, authorize('vendor', 'admin'), updateOrderItemStatus);
