@@ -108,7 +108,7 @@ async function createProduct(req, res) {
 async function updateProduct(req, res) {
   try {
     const id = Number(req.params.id);
-    const { name, price, category, stock } = req.body;
+    const { name, price, category, stock, storeId } = req.body;
 
     // Validate ID
     if (!Number.isInteger(id)) {
@@ -123,23 +123,36 @@ async function updateProduct(req, res) {
     }
 
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("id", sql.Int, id)
-      .input("name", sql.NVarChar(150), name)
-      .input("price", sql.Decimal(10, 2), price)
-      .input("category", sql.NVarChar(100), category)
-      .input("stock", sql.Int, stock)
-      .query(`
+    const request = pool.request();
+    request.input("id", sql.Int, id);
+    request.input("name", sql.NVarChar(150), name);
+    request.input("price", sql.Decimal(10, 2), price);
+    request.input("category", sql.NVarChar(100), category);
+    request.input("stock", sql.Int, stock);
+    if (storeId != null && storeId !== 0 && storeId !== "") {
+      request.input("storeId", sql.Int, storeId);
+    }
+    const queryStr = (storeId != null && storeId !== 0 && storeId !== "") ? `
         UPDATE Products
-        SET 
+        SET
+          Name = @name,
+          Price = @price,
+          Category = @category,
+          Stock = @stock,
+          StoreId = @storeId
+        OUTPUT INSERTED.*
+        WHERE ProductId = @id
+      ` : `
+        UPDATE Products
+        SET
           Name = @name,
           Price = @price,
           Category = @category,
           Stock = @stock
         OUTPUT INSERTED.*
         WHERE ProductId = @id
-      `);
+      `;
+    const result = await request.query(queryStr);
 
     // Check if the product existed
     if (result.rowsAffected[0] === 0) {

@@ -78,11 +78,8 @@ function authorizeRoles(...allowedRoles) {
     }
 
 
-    if (
-      !allowedRoles.includes(
-        req.user.role
-      )
-    ) {
+    const userRole = (req.user?.role || '').toString().toLowerCase();
+    if (!allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
 
       return res.status(403).json({
         message:

@@ -30,8 +30,7 @@ function Sidebar() {
 
     if (isAdmin) {
       items.push(
-        { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={20} /> },
-        { name: "Admin Panel", path: "/", icon: <Shield size={20} /> }
+        { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={20} /> }
       );
     } else if (isVendor) {
       items.push(
@@ -52,7 +51,6 @@ function Sidebar() {
       );
     } else if (isVendor) {
       items.push(
-        { name: "My Store", path: "/vendor/store", icon: <Store size={20} /> },
         { name: "My Products", path: "/vendor/products", icon: <Package size={20} /> },
         { name: "My Orders", path: "/vendor/orders", icon: <ShoppingCart size={20} /> }
       );
@@ -65,10 +63,10 @@ function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
+      {/* <div className="sidebar-logo">
         <div className="logo-icon">D</div>
-        <span>AdminPanel</span>
-      </div>
+        <span>Admin</span>
+      </div> */}
 
       <div className="sidebar-section">
         <span className="sidebar-heading">MAIN MENU</span>
